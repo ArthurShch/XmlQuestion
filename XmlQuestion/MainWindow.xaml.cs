@@ -23,6 +23,7 @@ namespace XmlQuestion
         public MainWindow()
         {
             InitializeComponent();
+            //тест
         }
     }
 }
