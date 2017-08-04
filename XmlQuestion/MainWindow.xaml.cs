@@ -23,7 +23,14 @@ namespace XmlQuestion
         public MainWindow()
         {
             InitializeComponent();
-            //тест
+
+            ParseExel excel = new ParseExel(@"D:\ExampleExcel.xlsx", 1);
+
+            excel.StartParse();
+
+            //string sdasdawdwad = excel.ReadCell(1, 1);
+
+
         }
     }
 }
