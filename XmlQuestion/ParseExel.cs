@@ -28,12 +28,14 @@ namespace XmlQuestion
         public List<int[]> rangeOfQuestion = new List<int[]>();
         public List<Question> questions = new List<Question>();
 
+        //в конструкторе сохраняется путь к файлу и номер листа в excel
         public ParseExel(string path, int Sheet)
         {
             this.path = path;
             this.Sheet = Sheet;
         }
 
+        // функция выполняющая парсинг файла и страницы exel, которые указаны в конструкторе
         public void StartParse()
         {
             wb = excel.Workbooks.Open(path);
@@ -42,12 +44,13 @@ namespace XmlQuestion
             categoryName = ReadCell(0, 1);
             questionName = ReadCell(1, 1);
 
-            endRowsQuestion = GetNumberLastRows();
-
+            FindAllQuestion();
             CreateQuestion();
+
             Close();
         }
 
+        //парсинг вопросов на основании информации об их границах 
         public void CreateQuestion()
         {
             foreach (int[] item in rangeOfQuestion)
@@ -57,11 +60,11 @@ namespace XmlQuestion
                 Q.numberQuestion = ReadCell(item[0], 0);
                 Q.textQuestion = ReadCell(item[0], 1);
 
-                for (int i = item[0]; i <= item[1]; i++)
+                for (int i = item[0] + 1; i <= item[1]; i++)
                 {
                     Q.answers.Add(new Answer()
                     {
-                        text = ReadCell(i,1),
+                        text = ReadCell(i, 1),
                         result = ReadCell(i, 2)
                     });
                 }
@@ -70,67 +73,63 @@ namespace XmlQuestion
             }
         }
 
-            public void Close()
+        //закрытие приложения excel
+        public void Close()
+        {
+            wb.Save();
+            wb.Close(true);
+            excel.Quit();
+
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(excel);
+            excel = null;
+        }
+
+        // получить содержание ячейки по высоте и ширине
+        public string ReadCell(int i, int j)//функция чтения ячейки i,j
+        {
+            i++;
+            j++;
+            if (ws.Cells[i, j].Value2 != null)
+                return Convert.ToString(ws.Cells[i, j].Value2);
+            else
+                return "";
+        }
+
+        //поиск границ вопросов по строкам в файле excel  
+        public void FindAllQuestion()
+        {
+            int currentsStartNumberPrevious = startRowsQuestion;
+            int currentsEndNumberPrevious = startRowsQuestion;
+
+            //каждая итерация один вопрос
+            while (true)
             {
-                wb.Save();
-                wb.Close(true);
-                excel.Quit();
-
-                System.Runtime.InteropServices.Marshal.ReleaseComObject(excel);
-                excel = null;
-            }
-
-            public string ReadCell(int i, int j)//функция чтения ячейки i,j
-            {
-                //Excel.Application ObjWorkExcel = new Excel.Application(); //открыть эксель
-                //Excel.Workbook ObjWorkBook = ObjWorkExcel.Workbooks.Open(@"C:\1.xlsx", Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing); //открыть файл
-                //Excel.Worksheet ObjWorkSheet = (Excel.Worksheet)ObjWorkBook.Sheets[1]; //получить 1 лист
-                //var lastCell = ObjWorkSheet.Cells.SpecialCells(Excel.XlCellType.xlCellTypeLastCell);//1 ячейку
-                //string[,] list = new string[lastCell.Column, lastCell.Row];
-                i++;
-                j++;
-                if (ws.Cells[i, j].Value2 != null)
-                    return Convert.ToString(ws.Cells[i, j].Value2);
-                else
-                    return "";
-            }
-
-            public int GetNumberLastRows()
-            {
-                int currentsStartNumberPrevious = startRowsQuestion;
-                int currentsEndNumberPrevious = startRowsQuestion;
-
-                //каждая итерация один вопрос
-                while (true)
+                for (int i = currentsStartNumberPrevious; ; i++)
                 {
+                    string cellQuestion = ReadCell(i, 1);
+                    string cellAnswer = ReadCell(i, 2);
 
-                    for (int i = currentsStartNumberPrevious; ; i++)
+                    if (cellQuestion == "" && cellAnswer == "")
                     {
-                        string cellQuestion = ReadCell(i, 1);
-                        string cellAnswer = ReadCell(i, 2);
-
-                        if (cellQuestion == "" && cellAnswer == "")
-                        {
-                            currentsEndNumberPrevious = i - 1;
-                            break;
-                        }
-
-                    }
-
-                    rangeOfQuestion.Add(new int[] { currentsStartNumberPrevious, currentsEndNumberPrevious });
-
-                    currentsStartNumberPrevious = currentsEndNumberPrevious + 2;
-                    // проверка на конец файла
-                    if (ReadCell(currentsStartNumberPrevious, 1) == "")
-                    {
+                        currentsEndNumberPrevious = i - 1;
                         break;
                     }
                 }
 
+                rangeOfQuestion.Add(new int[] { currentsStartNumberPrevious, currentsEndNumberPrevious });
 
-
-                return currentsEndNumberPrevious;
+                currentsStartNumberPrevious = currentsEndNumberPrevious + 2;
+                // проверка на конец файла
+                if (ReadCell(currentsStartNumberPrevious, 1) == "")
+                {
+                    break;
+                }
             }
 
+            endRowsQuestion = currentsEndNumberPrevious;
         }
+
     }
+
+    
+}

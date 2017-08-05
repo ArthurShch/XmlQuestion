@@ -28,6 +28,10 @@ namespace XmlQuestion
 
             excel.StartParse();
 
+            IdentificationOfTypeQuestion uhhjujuh = new IdentificationOfTypeQuestion(excel.questions);
+
+
+
             //string sdasdawdwad = excel.ReadCell(1, 1);
 
 

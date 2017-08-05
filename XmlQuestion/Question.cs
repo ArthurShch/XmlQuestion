@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace XmlQuestion
 {
-    //основной класс вопросов
-    class Question
+    public class Question
     {
         public string textQuestion;
         public string numberQuestion;
@@ -15,7 +14,7 @@ namespace XmlQuestion
         public List<Answer> answers = new List<Answer>();
     }
 
-    class Answer
+    public class Answer
     {
         public string text;
         public string result;
