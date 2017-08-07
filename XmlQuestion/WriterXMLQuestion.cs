@@ -8,16 +8,96 @@ using System.Xml;
 
 namespace XmlQuestion
 {
+
+
     class WriterXMLQuestion
     {
-        public WriterXMLQuestion()
+        public List<QuestionWithType> ListQuestionWithType = new List<QuestionWithType>();
+
+        public string PathToSaveFile;
+
+
+        public void DoWriteQuestions()
         {
+            XmlDocument xDoc = new XmlDocument();
+            xDoc.Load("users.xml");
+            XmlElement xRoot = xDoc.DocumentElement;
+
+            foreach (var el in ListQuestionWithType)
+            {
+                xRoot.AppendChild(WriteQuestion(el, xDoc));
+            }
+
+            xDoc.Save("users.xml");// Закрытие
+        }
+
+        XmlElement WriteQuestion(QuestionWithType question, XmlDocument xDoc)
+        {
+            //switch (question.type)
+            //{
+            //    case TypeQuestion.ShortAnswer:
+
+            //        break;
+            //    case TypeQuestion.MultiChoice:
+            //        break;
+            //    case TypeQuestion.TrueFalse:
+            //        break;
+            //    case TypeQuestion.Matching:
+            //        break;
+            //}
+            XmlElement que = xDoc.CreateElement("question");
+
+            //XmlElement question = xDoc.CreateElement("question");//1
+            XmlAttribute questionType = xDoc.CreateAttribute("type");//2
+            XmlText QuestionTypeName = xDoc.CreateTextNode("category");//3
+            XmlElement questionCategory = xDoc.CreateElement("category");//4
+            XmlElement questionCategoryText = xDoc.CreateElement("text");//5
+                                                                         //XmlText QuestionCategoryTextText = xDoc.CreateTextNode("$course$/Животные");
+
+            // xRoot.AppendChild(question);//1
+            que.Attributes.Append(questionType);//2
+            questionType.AppendChild(QuestionTypeName);//3
+            que.AppendChild(questionCategory);//4
+            questionCategory.AppendChild(questionCategoryText);//5
+
+
+            return que;
+        }
+
+        public void WriteStartFile()
+        {
+            //подготовка файла для использования
             File.Delete("users.xml");//удаление если файл уже существует(чтобы не было конфликта перезаписи) 
             XmlTextWriter textWritter = new XmlTextWriter("users.xml", null); //создание xml
             textWritter.WriteStartDocument();// Начало чтения документа
             textWritter.WriteStartElement("quiz");// Создание корневого узла (для возможности работы с файлом)
             textWritter.WriteEndElement();// Конец записи
             textWritter.Close();// Закрытие файла
+        }
+
+        public void Go()
+        {
+            WriteStartFile();
+            DoWriteQuestions();
+        }
+
+
+
+        public WriterXMLQuestion()
+        {
+
+            //подготовка файла для использования
+            File.Delete("users.xml");//удаление если файл уже существует(чтобы не было конфликта перезаписи) 
+            XmlTextWriter textWritter = new XmlTextWriter("users.xml", null); //создание xml
+            textWritter.WriteStartDocument();// Начало чтения документа
+            textWritter.WriteStartElement("quiz");// Создание корневого узла (для возможности работы с файлом)
+            textWritter.WriteEndElement();// Конец записи
+            textWritter.Close();// Закрытие файла
+
+
+
+
+
 
 
             ////////////////////
@@ -67,7 +147,7 @@ namespace XmlQuestion
             //userElem.AppendChild(ageElem);
             //xRoot.AppendChild(userElem);
 
-# endregion 
+            #endregion
 
             xDoc.Save("users.xml");// Закрытие
         }

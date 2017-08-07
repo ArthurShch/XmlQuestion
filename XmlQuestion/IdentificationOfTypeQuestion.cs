@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace XmlQuestion
 {
-
+    //типы вопросов
     public enum TypeQuestion
     {
         ShortAnswer,
@@ -21,6 +21,7 @@ namespace XmlQuestion
         public Question Question;
     }
 
+    //класс определяющий типы вопросов 
     public class IdentificationOfTypeQuestion
     {
         public List<QuestionWithType> ListQuestionWithType = new List<QuestionWithType>();
@@ -34,19 +35,19 @@ namespace XmlQuestion
             ReceivingTypeQuestion();
         }
 
+        //функция определения типа вопросов
         public void ReceivingTypeQuestion()
         {
             foreach (var el in questions)
             {
-
-                if (el.textQuestion.Contains("___"))
+                if (el.TextQuestion.Contains("___"))
                 {
                     ListQuestionWithType.Add(new QuestionWithType() { Question = el, type = TypeQuestion.ShortAnswer });
                     continue;
                 }
 
-                int countAnswers = el.answers.Count(x => x.text != "");
-                int countResultAnswers = el.answers.Count(x => x.result != "");
+                int countAnswers = el.Answers.Count(x => x.Text != "");
+                int countResultAnswers = el.Answers.Count(x => x.Result != "");
 
                 if (countAnswers == 2 && countResultAnswers == 1)
                 {
@@ -54,17 +55,14 @@ namespace XmlQuestion
                     continue;
                 }
 
-                if (el.answers.FindAll(x => (x.result != "1" && x.result != "") ).Count > 0)
+                if (el.Answers.FindAll(x => (x.Result != "1" && x.Result != "") ).Count > 0)
                 {
                     ListQuestionWithType.Add(new QuestionWithType() { Question = el, type = TypeQuestion.Matching });
                     continue;
                 }
 
                 ListQuestionWithType.Add(new QuestionWithType() { Question = el, type = TypeQuestion.MultiChoice });
-
             }
         }
-
-
     }
 }

@@ -6,17 +6,35 @@ using System.Threading.Tasks;
 
 namespace XmlQuestion
 {
-    public class Question
-    {
-        public string textQuestion;
-        public string numberQuestion;
+    //public interface IQuestion
+    //{
+    //    string TextQuestion { get; set; }
 
-        public List<Answer> answers = new List<Answer>();
+    //    string NumberQuestion { get; set; }
+
+    //    List<IAnswer> Answers { get; set; }
+    //}
+
+    public class Question /*: IQuestion*/
+    {
+        public string TextQuestion { get; set; }
+        public string NumberQuestion { get; set; }
+
+        //public List<IAnswer> Answers { get; set; } = new List<IAnswer>();
+        public List<Answer> Answers { get; set; } = new List<Answer>();
+
+        //public List<Answer> answers = new List<Answer>();
     }
 
-    public class Answer
+    //public interface IAnswer
+    //{
+    //    string Text { get; set; }
+    //    string Result { get; set; }
+    //}
+
+    public class Answer /*: IAnswer*/
     {
-        public string text;
-        public string result;
+        public string Text { get; set; }
+        public string Result { get; set; }
     }
 }

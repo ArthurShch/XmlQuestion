@@ -24,11 +24,14 @@ namespace XmlQuestion
         {
             InitializeComponent();
 
-            ParseExel excel = new ParseExel(@"D:\ExampleExcel.xlsx", 1);
+            //ParseExel excel = new ParseExel(@"D:\ExampleExcel.xlsx", 1);
 
-            excel.StartParse();
+            //excel.StartParse();
 
-            IdentificationOfTypeQuestion uhhjujuh = new IdentificationOfTypeQuestion(excel.questions);
+            //IdentificationOfTypeQuestion uhhjujuh = new IdentificationOfTypeQuestion(excel.questions);
+
+
+            WriterXMLQuestion dwdwdsawd = new WriterXMLQuestion();
 
 
 

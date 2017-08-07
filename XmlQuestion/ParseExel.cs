@@ -57,15 +57,15 @@ namespace XmlQuestion
             {
                 Question Q = new Question();
 
-                Q.numberQuestion = ReadCell(item[0], 0);
-                Q.textQuestion = ReadCell(item[0], 1);
+                Q.NumberQuestion = ReadCell(item[0], 0);
+                Q.TextQuestion = ReadCell(item[0], 1);
 
                 for (int i = item[0] + 1; i <= item[1]; i++)
                 {
-                    Q.answers.Add(new Answer()
+                    Q.Answers.Add(new Answer()
                     {
-                        text = ReadCell(i, 1),
-                        result = ReadCell(i, 2)
+                        Text = ReadCell(i, 1),
+                        Result = ReadCell(i, 2)
                     });
                 }
 
