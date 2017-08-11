@@ -30,7 +30,7 @@ namespace XmlQuestion
 
             IdentificationOfTypeQuestion uhhjujuh = new IdentificationOfTypeQuestion(excel.questions);
 
-            WriterXMLQuestion dwdwdsawd = new WriterXMLQuestion(uhhjujuh.ListQuestionWithType, excel.categoryName, excel.questionName);
+            WriterXMLQuestion dwdwdsawd = new WriterXMLQuestion(uhhjujuh.ListQuestionWithType, excel.categoryName, excel.questionName, "users.xml");
 
             //ParseExel excel1232 = new ParseExel(@"D:\ExampleExcel.xlsx", 1);
 

@@ -20,10 +20,11 @@ namespace XmlQuestion
         string nameQuestion;
 
         public WriterXMLQuestion() { }
-        public WriterXMLQuestion(List<QuestionWithType> ListQuestionWithType, string category, string nameQuestion)
+        public WriterXMLQuestion(List<QuestionWithType> ListQuestionWithType, string category, string nameQuestion, string PathToSaveFile)
         {
             this.category = category;
             this.nameQuestion = nameQuestion;
+            this.PathToSaveFile = PathToSaveFile;
 
             this.ListQuestionWithType = ListQuestionWithType.ToList();
 
@@ -40,95 +41,55 @@ namespace XmlQuestion
         public void DoWriteQuestions()
         {
             XmlDocument xDoc = new XmlDocument();
-            xDoc.Load("users.xml");
+            xDoc.Load(PathToSaveFile);
             XmlElement xRoot = xDoc.DocumentElement;
 
-            XmlElement XMLQuestionHead = xDoc.CreateElement("question");
-            XmlAttribute XMLQuestionHeadType = xDoc.CreateAttribute("type");
-            XmlText XMLQuestionHeadTypeName = xDoc.CreateTextNode("category");
-            XmlElement XMLQuestionHeadCategory = xDoc.CreateElement("category");
-            XmlElement XMLQuestionHeadCategoryText = xDoc.CreateElement("text");
-            XmlText XMLQuestionHeadCategoryTextText = xDoc.CreateTextNode("$course$/" + this.category);
+            XmlElement XMLQuestionHead = AddXmlElement(ref xRoot, xDoc, "question");
+            AddAtribute(ref XMLQuestionHead, xDoc, "type", "category");
+            XmlElement XMLQuestionHeadCategory = AddXmlElement(ref xRoot, xDoc, "category");
+            AddXmlElement(ref XMLQuestionHeadCategory, xDoc, "text", "$course$/" + this.category);
 
-            xRoot.AppendChild(XMLQuestionHead);
-            XMLQuestionHead.Attributes.Append(XMLQuestionHeadType);
-            XMLQuestionHeadType.AppendChild(XMLQuestionHeadTypeName);
-            XMLQuestionHead.AppendChild(XMLQuestionHeadCategory);
-            XMLQuestionHeadCategory.AppendChild(XMLQuestionHeadCategoryText);
-            XMLQuestionHeadCategoryText.AppendChild(XMLQuestionHeadCategoryTextText);
-            
             foreach (var el in ListQuestionWithType)
             {
                 xRoot.AppendChild(WriteQuestion(el, xDoc));
             }
 
-            xDoc.Save("users.xml");// Закрытие
+            xDoc.Save(PathToSaveFile);// Закрытие
         }
 
         XmlElement WriteQuestion(QuestionWithType question, XmlDocument xDoc)
         {
             XmlElement XMLQuestion = xDoc.CreateElement("question");
+            AddAtribute(ref XMLQuestion, xDoc, "type", question.type.ToString().ToLower());
 
-            XmlAttribute XMLQuestionType = xDoc.CreateAttribute("type");
-            XMLQuestion.Attributes.Append(XMLQuestionType);
+            XmlElement XMLQuestionName = AddXmlElement(ref XMLQuestion, xDoc, "name");
+            AddXmlElement(ref XMLQuestionName, xDoc, "text", nameQuestion + " " + question.Question.NumberQuestion);
 
-            XmlText XMLQuestionTypeText = xDoc.CreateTextNode(question.type.ToString().ToLower());
-            XMLQuestionType.AppendChild(XMLQuestionTypeText);
+            XmlElement XMLQuestionText = AddXmlElement(ref XMLQuestion, xDoc, "questiontext");
+            AddAtribute(ref XMLQuestionText, xDoc, "format", "html");
+            AddCDATAElement(ref XMLQuestionText, xDoc, question.Question.TextQuestion);
 
-            XmlElement XMLQuestionName = xDoc.CreateElement("name");
-            XMLQuestion.AppendChild(XMLQuestionName);
+            XmlElement XMLQuestionGeneralFeedback = AddXmlElement(ref XMLQuestion, xDoc, "generalfeedback");
+            AddAtribute(ref XMLQuestionGeneralFeedback, xDoc, "format", "html");
 
-            XmlElement XMLQuestionNameText = xDoc.CreateElement("text");
-            XMLQuestionName.AppendChild(XMLQuestionNameText);
-
-            XmlText XMLQuestionCategoryTextText = xDoc.CreateTextNode(nameQuestion + " " + question.Question.NumberQuestion);
-            XMLQuestionNameText.AppendChild(XMLQuestionCategoryTextText);
-
-            XmlElement XMLQuestionText = xDoc.CreateElement("questiontext");
-            XMLQuestion.AppendChild(XMLQuestionText);
-
-            XmlElement XMLQuestionTextText = xDoc.CreateElement("text");
-            XMLQuestionText.AppendChild(XMLQuestionTextText);
-
-            XmlCDataSection XMLQuestionTextTextCDDataText = xDoc.CreateCDataSection("<p>" + question.Question.TextQuestion + "</p>");
-            XMLQuestionTextText.AppendChild(XMLQuestionTextTextCDDataText);
-
-            XmlElement XMLQuestionGeneralFeedback = xDoc.CreateElement("generalfeedback");
-            XMLQuestion.AppendChild(XMLQuestionGeneralFeedback);
-
-            XmlElement XMLQuestionGeneralFeedbackText = xDoc.CreateElement("text");
-            XMLQuestionGeneralFeedback.AppendChild(XMLQuestionGeneralFeedbackText);
-
-            XmlElement XMLQuestionDefaultGrade = xDoc.CreateElement("defaultgrade");
-            XMLQuestion.AppendChild(XMLQuestionDefaultGrade);
-
-            XmlElement XMLQuestionDefaultGradeText = xDoc.CreateElement("text");
-            XMLQuestionDefaultGrade.AppendChild(XMLQuestionDefaultGradeText);
-
-            XmlText XMLQuestionDefaultGradeTextText = xDoc.CreateTextNode("1.0000000");
-            XMLQuestionDefaultGradeText.AppendChild(XMLQuestionDefaultGradeTextText);
-
-
-
-
-            //
-            //XmlCDataSection cdata = xDoc.CreateCDataSection("<p>" + textQuestion + "</p>");//7
+            AddXmlElement(ref XMLQuestionGeneralFeedback, xDoc, "text");
+            AddXmlElement(ref XMLQuestion, xDoc, "defaultgrade", "1.0000000");
 
             switch (question.type)
             {
                 case TypeQuestion.ShortAnswer:
-
+                    CreateQuestionShortAnswer(ref XMLQuestion, xDoc, question);
                     break;
                 case TypeQuestion.MultiChoice:
                     CreateQuestionMultiChoice(ref XMLQuestion, xDoc, question);
                     break;
                 case TypeQuestion.TrueFalse:
+                    CreateQuestionTrueFalse(ref XMLQuestion, xDoc, question);
                     break;
                 case TypeQuestion.Matching:
+                    CreateQuestionMatching(ref XMLQuestion, xDoc, question);
                     break;
             }
-
-
 
             return XMLQuestion;
         }
@@ -136,8 +97,8 @@ namespace XmlQuestion
         public void WriteStartFile()
         {
             //подготовка файла для использования
-            File.Delete("users.xml");//удаление если файл уже существует(чтобы не было конфликта перезаписи) 
-            XmlTextWriter textWritter = new XmlTextWriter("users.xml", null); //создание xml
+            File.Delete(PathToSaveFile);//удаление если файл уже существует(чтобы не было конфликта перезаписи) 
+            XmlTextWriter textWritter = new XmlTextWriter(PathToSaveFile, null); //создание xml
             textWritter.WriteStartDocument();// Начало чтения документа
             textWritter.WriteStartElement("quiz");// Создание корневого узла (для возможности работы с файлом)
             textWritter.WriteEndElement();// Конец записи
@@ -170,82 +131,82 @@ namespace XmlQuestion
 
         void AddCDATAElement(ref XmlElement goal, XmlDocument xDoc, string CDATAText)
         {
-
             XmlElement ElText = xDoc.CreateElement("text");
             XmlCDataSection XMLCDDataText = xDoc.CreateCDataSection("<p>" + CDATAText + "</p>");
-            
+
             ElText.AppendChild(XMLCDDataText);
             goal.AppendChild(ElText);
         }
 
+        void CreateQuestionMatching(ref XmlElement XMLQuestion, XmlDocument xDoc, QuestionWithType QWT)
+        {
+            AddXmlElement(ref XMLQuestion, xDoc, "penalty", "0.3333333");
+            AddXmlElement(ref XMLQuestion, xDoc, "hidden", "0");
+            AddXmlElement(ref XMLQuestion, xDoc, "shuffleanswers", "true");
+
+            #region feedback
+            XmlElement XMLQuestionCorrectFeedback = AddXmlElement(ref XMLQuestion, xDoc, "correctfeedback");
+            AddAtribute(ref XMLQuestionCorrectFeedback, xDoc, "format", "html");
+            AddCDATAElement(ref XMLQuestionCorrectFeedback, xDoc, "Ваш ответ верный.");
+
+            XmlElement XMLQuestionPartiallyCorrectFeedback = AddXmlElement(ref XMLQuestion, xDoc, "partiallycorrectfeedback");
+            AddAtribute(ref XMLQuestionPartiallyCorrectFeedback, xDoc, "format", "html");
+            AddCDATAElement(ref XMLQuestionPartiallyCorrectFeedback, xDoc, "Ваш ответ частично правильный.");
+
+            XmlElement XMLQuestionIncorrectFeedback = AddXmlElement(ref XMLQuestion, xDoc, "incorrectfeedback");
+            AddAtribute(ref XMLQuestionIncorrectFeedback, xDoc, "format", "html");
+            AddCDATAElement(ref XMLQuestionIncorrectFeedback, xDoc, "Ваш ответ неправильный.");
+
+            #endregion
+
+            AddXmlElement(ref XMLQuestion, xDoc, "shownumcorrect");
+
+            foreach (var el in QWT.Question.Answers)
+            {
+                XmlElement XMLQuestionSubQuestion = AddXmlElement(ref XMLQuestion, xDoc, "subquestion");
+                AddAtribute(ref XMLQuestionSubQuestion, xDoc, "format", "html");
+
+                if (el.Text != "")
+                {
+                    AddCDATAElement(ref XMLQuestionSubQuestion, xDoc, el.Text);
+                }
+                else
+                {
+                    AddXmlElement(ref XMLQuestionSubQuestion, xDoc, "text");
+                }
+
+                XmlElement XMLQuestionAnswer = AddXmlElement(ref XMLQuestionSubQuestion, xDoc, "answer");
+                AddXmlElement(ref XMLQuestionAnswer, xDoc,"text", el.Result);
+            }
+        }
 
         void CreateQuestionMultiChoice(ref XmlElement XMLQuestion, XmlDocument xDoc, QuestionWithType QWT)
         {
             AddXmlElement(ref XMLQuestion, xDoc, "penalty", "0.3333333");
-
-            //XmlElement XMLQuestionPenalty = xDoc.CreateElement("penalty");
-            //XMLQuestion.AppendChild(XMLQuestionPenalty);
-
-            //XmlText XMLQuestionPenaltyText = xDoc.CreateTextNode("0.3333333");
-            //XMLQuestionPenalty.AppendChild(XMLQuestionPenaltyText);
-
             AddXmlElement(ref XMLQuestion, xDoc, "hidden", "0");
-
-            //XmlElement XMLQuestionHidden = xDoc.CreateElement("hidden");
-            //XMLQuestion.AppendChild(XMLQuestionHidden);
-
-            //XmlText XMLQuestionHiddenText = xDoc.CreateTextNode("0");
-            //XMLQuestionHidden.AppendChild(XMLQuestionHiddenText);
-
             //правельный ответ один или несколько
             bool singleCorrectAnswer = QWT.Question.Answers.Count(x => x.Result == "1") == 1;
 
             AddXmlElement(ref XMLQuestion, xDoc, "single", singleCorrectAnswer.ToString().ToLower());
-
-            //XmlElement XMLQuestionSingle = xDoc.CreateElement("single");
-            //XMLQuestion.AppendChild(XMLQuestionSingle);
-
-            //XmlText XMLQuestionSingleText = xDoc.CreateTextNode(singleCorrectAnswer.ToString().ToLower());
-            //XMLQuestionSingle.AppendChild(XMLQuestionSingleText);
-
             AddXmlElement(ref XMLQuestion, xDoc, "shuffleanswers", "true");
-
-            ////XmlElement XMLQuestionShuffleAnswers = xDoc.CreateElement("shuffleanswers");
-            ////XMLQuestion.AppendChild(XMLQuestionShuffleAnswers);
-
-            ////XmlText XMLQuestionShuffleAnswersText = xDoc.CreateTextNode("true");
-            ////XMLQuestionShuffleAnswers.AppendChild(XMLQuestionShuffleAnswersText);
-
             AddXmlElement(ref XMLQuestion, xDoc, "answernumbering", "abc");
-            //XmlElement XMLQuestionAnswerNumbering = xDoc.CreateElement("answernumbering");
-            //XMLQuestion.AppendChild(XMLQuestionAnswerNumbering);
-
-            //XmlText XMLQuestionAnswerNumberingText = xDoc.CreateTextNode("abc");
-            //XMLQuestionAnswerNumbering.AppendChild(XMLQuestionAnswerNumberingText);
 
             #region feedback
-            XmlElement XMLQuestionCorrectFeedback = xDoc.CreateElement("correctfeedback");
-            XMLQuestion.AppendChild(XMLQuestionCorrectFeedback);
-
-            XmlElement XMLQuestionCorrectFeedbackText = xDoc.CreateElement("text");
-            XMLQuestion.AppendChild(XMLQuestionCorrectFeedback);
-
+            XmlElement XMLQuestionCorrectFeedback = AddXmlElement(ref XMLQuestion, xDoc, "correctfeedback");
             AddAtribute(ref XMLQuestionCorrectFeedback, xDoc, "format", "html");
+            AddCDATAElement(ref XMLQuestionCorrectFeedback, xDoc, "Ваш ответ верный.");
 
-            //XmlAttribute XMLQuestionCorrectFeedbackAttributeFormat = xDoc.CreateAttribute("format");
-            //XMLQuestionCorrectFeedback.Attributes.Append(XMLQuestionCorrectFeedbackAttributeFormat);
+            XmlElement XMLQuestionPartiallyCorrectFeedback = AddXmlElement(ref XMLQuestion, xDoc, "partiallycorrectfeedback");
+            AddAtribute(ref XMLQuestionPartiallyCorrectFeedback, xDoc, "format", "html");
+            AddCDATAElement(ref XMLQuestionPartiallyCorrectFeedback, xDoc, "Ваш ответ частично правильный.");
 
-            //XmlText XMLQuestionCorrectFeedbackAttributeFormatText = xDoc.CreateTextNode("html");
-            //XMLQuestionCorrectFeedback.AppendChild(XMLQuestionCorrectFeedbackAttributeFormatText);
-
-
-
+            XmlElement XMLQuestionIncorrectFeedback = AddXmlElement(ref XMLQuestion, xDoc, "incorrectfeedback");
+            AddAtribute(ref XMLQuestionIncorrectFeedback, xDoc, "format", "html");
+            AddCDATAElement(ref XMLQuestionIncorrectFeedback, xDoc, "Ваш ответ неправильный.");
 
             #endregion
-            //correctfeedback
 
-
-
+            AddXmlElement(ref XMLQuestion, xDoc, "shownumcorrect");
 
             string answerFractionCorrect;
             string answerFractionInCorrect;
@@ -258,56 +219,68 @@ namespace XmlQuestion
             else
             {
                 double countCorrectAnswer = QWT.Question.Answers.Count(x => x.Result == "1");
-                double countInCorrectAnswer = QWT.Question.Answers.Count(x => x.Result == "0");
+                double countInCorrectAnswer = QWT.Question.Answers.Count(x => x.Result == "");
 
-                answerFractionCorrect = ((double)(100.00 / countCorrectAnswer)).ToString("F5");
-                answerFractionInCorrect = ((double)(-100.00 / countInCorrectAnswer)).ToString("F5");
+                //возможно сдесь должна быть другая логика округления в случае получения целого числа
+
+                answerFractionCorrect = ((double)(100.00 / countCorrectAnswer)).ToString("F5").Replace(',', '.');
+                answerFractionInCorrect = ((double)(-100.00 / countInCorrectAnswer)).ToString("F5").Replace(',', '.');
             }
 
+            foreach (var el in QWT.Question.Answers)
+            {
+                XmlElement XMLQuestionAnswer = AddXmlElement(ref XMLQuestion, xDoc, "answer");
 
+                AddAtribute(ref XMLQuestionAnswer, xDoc, "fraction",
+                    el.Result == "1" ? answerFractionCorrect : answerFractionInCorrect);
+                AddAtribute(ref XMLQuestionAnswer, xDoc, "format", "html");
+                AddCDATAElement(ref XMLQuestionAnswer, xDoc, el.Text);
 
-            //singleCorrectAnswer.ToString();
-
-
-
-
-
-
-
-
-
-
-
+                XmlElement XMLQuestionAnswerFeedback = AddXmlElement(ref XMLQuestionAnswer, xDoc, "feedback");
+                AddAtribute(ref XMLQuestionAnswerFeedback, xDoc, "format", "html");
+                AddXmlElement(ref XMLQuestionAnswerFeedback, xDoc, "text");
+            }
         }
 
-
-        void CreateQuestionShortAnswer(ref XmlElement XMLQuestion, QuestionWithType QWT)
+        void CreateQuestionShortAnswer(ref XmlElement XMLQuestion, XmlDocument xDoc, QuestionWithType QWT)
         {
+            AddXmlElement(ref XMLQuestion, xDoc, "penalty", "0.3333333");
+            AddXmlElement(ref XMLQuestion, xDoc, "hidden", "0");
+            AddXmlElement(ref XMLQuestion, xDoc, "usecase", "0");
 
+            foreach (var el in QWT.Question.Answers)
+            {
+                XmlElement XMLQuestionAnswer = AddXmlElement(ref XMLQuestion, xDoc, "answer");
+
+                AddAtribute(ref XMLQuestionAnswer, xDoc, "fraction", "100");
+                AddAtribute(ref XMLQuestionAnswer, xDoc, "format", "moodle_auto_format");
+                AddXmlElement(ref XMLQuestionAnswer, xDoc, "text", el.Text);
+
+                XmlElement XMLQuestionAnswerFeedback = AddXmlElement(ref XMLQuestionAnswer, xDoc, "feedback");
+                AddAtribute(ref XMLQuestionAnswerFeedback, xDoc, "format", "html");
+                AddXmlElement(ref XMLQuestionAnswerFeedback, xDoc, "text");
+            }
         }
 
+        void CreateQuestionTrueFalse(ref XmlElement XMLQuestion, XmlDocument xDoc, QuestionWithType QWT)
+        {
+            AddXmlElement(ref XMLQuestion, xDoc, "penalty", "1.0000000");
+            AddXmlElement(ref XMLQuestion, xDoc, "hidden", "0");
 
+            foreach (var el in QWT.Question.Answers)
+            {
+                string answerNumber = el.Result == "1" ? "100" : "0";
 
+                XmlElement XMLQuestionAnswer = AddXmlElement(ref XMLQuestion, xDoc, "answer");
 
+                AddAtribute(ref XMLQuestionAnswer, xDoc, "fraction", answerNumber);
+                AddAtribute(ref XMLQuestionAnswer, xDoc, "format", "moodle_auto_format");
+                AddXmlElement(ref XMLQuestionAnswer, xDoc, "text", el.Result);
 
-
-        //public WriterXMLQuestion()
-        //{
-
-        //    //подготовка файла для использования
-        //    File.Delete("users.xml");//удаление если файл уже существует(чтобы не было конфликта перезаписи) 
-        //    XmlTextWriter textWritter = new XmlTextWriter("users.xml", null); //создание xml
-        //    textWritter.WriteStartDocument();// Начало чтения документа
-        //    textWritter.WriteStartElement("quiz");// Создание корневого узла (для возможности работы с файлом)
-        //    textWritter.WriteEndElement();// Конец записи
-        //    textWritter.Close();// Закрытие файла
-
-
-
-
-
-
-
-
+                XmlElement XMLQuestionAnswerFeedback = AddXmlElement(ref XMLQuestionAnswer, xDoc, "feedback");
+                AddAtribute(ref XMLQuestionAnswerFeedback, xDoc, "format", "html");
+                AddXmlElement(ref XMLQuestionAnswerFeedback, xDoc, "text");
+            }
+        }
     }
 }
