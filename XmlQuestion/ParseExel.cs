@@ -10,7 +10,7 @@ using _Excel = Microsoft.Office.Interop.Excel;
 
 namespace XmlQuestion
 {
-    class ParseExel
+    class ParseExel 
     {
         _Application excel = new _Excel.Application();
         Workbook wb;
@@ -33,6 +33,10 @@ namespace XmlQuestion
         {
             this.path = path;
             this.Sheet = Sheet;
+        }
+        ~ParseExel()
+        {
+            Close();
         }
 
         // функция выполняющая парсинг файла и страницы exel, которые указаны в конструкторе
@@ -76,12 +80,26 @@ namespace XmlQuestion
         //закрытие приложения excel
         public void Close()
         {
+            if (excel == null)
+            {
+                return;
+            }
+
+            var workbooks = excel.Workbooks;
             wb.Save();
             wb.Close(true);
             excel.Quit();
 
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(wb);
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(workbooks);
+
             System.Runtime.InteropServices.Marshal.ReleaseComObject(excel);
             excel = null;
+            wb = null;
+            ws = null;
+
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
         }
 
         // получить содержание ячейки по высоте и ширине
