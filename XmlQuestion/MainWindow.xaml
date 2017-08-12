@@ -5,8 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:XmlQuestion"
         mc:Ignorable="d"
+        ResizeMode="NoResize"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        
+        <CheckBox Content="CheckBox" HorizontalAlignment="Left" Margin="10,0,0,0" VerticalAlignment="Top"/>
+        <Button Content="Button" HorizontalAlignment="Left" Margin="39,112,0,0" VerticalAlignment="Top" Width="75" Click="SelectFileForParse"/>
+        <Label Name="PathToFile" Content="Label" HorizontalAlignment="Left" Margin="10,31,0,0" VerticalAlignment="Top" Width="499" Height="40"/>
+        <Button Click="StartParsing" Content="Start Parsing" HorizontalAlignment="Left" Margin="39,186,0,0" VerticalAlignment="Top" Width="75"/>
+
     </Grid>
 </Window>

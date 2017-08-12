@@ -55,6 +55,7 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="IdentificationOfTypeQuestion.cs" />
+    <Compile Include="ProcessingElement.cs" />
     <Compile Include="Question.cs" />
     <Compile Include="WriterXMLQuestion.cs" />
     <Page Include="MainWindow.xaml">
