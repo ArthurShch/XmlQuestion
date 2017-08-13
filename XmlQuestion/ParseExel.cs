@@ -10,13 +10,13 @@ using _Excel = Microsoft.Office.Interop.Excel;
 
 namespace XmlQuestion
 {
-    class ParseExel 
+    class ParseExel
     {
-        _Application excel = new _Excel.Application();
+        _Application excel;
         Workbook wb;
         Worksheet ws;
 
-        string path = "";
+        public string path = "";
         int Sheet;
 
         public string categoryName;
@@ -34,14 +34,15 @@ namespace XmlQuestion
             this.path = path;
             this.Sheet = Sheet;
         }
-        ~ParseExel()
-        {
-            Close();
-        }
+        //~ParseExel()
+        //{
+        //    Close();
+        //}
 
         // функция выполняющая парсинг файла и страницы exel, которые указаны в конструкторе
         public void StartParse()
         {
+            excel = new _Excel.Application();
             wb = excel.Workbooks.Open(path);
             ws = wb.Worksheets[Sheet];
 
@@ -149,5 +150,5 @@ namespace XmlQuestion
 
     }
 
-    
+
 }
